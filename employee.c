@@ -21,6 +21,7 @@ void mostrar(TData *data);  // Muestra todos los apellidos guardados en la lista
 int encontrar(TData *data, char apellido[LMAX]);  // Devuelve la ubicación de un apellido en la lista.
 bool repetidos(char apellido1[LMAX], char apellido2[LMAX]);  // Devuelve verdadero si dos apellidos están repetidos en la lista.
 void eliminarRepetidos(TData *data);  // Elimina apellidos repetidos.
+void guardarEmpleadosEnArchivo(TData *data, const char *filename);  // Guarda los apellidos en un archivo de texto.
 
 // Perfil de las acciones ejecutadas en cada caso del switch.
 void opcion1(TData *data);
@@ -28,6 +29,7 @@ void opcion2(TData *data);
 void opcion3(TData *data);
 void opcion4(TData *data);
 void opcion5(TData *data);
+void opcion6(TData *data);
 
 int main() {
     int opcion;
@@ -41,7 +43,8 @@ int main() {
         printf("Modificar datos de empleado (3)\n");
         printf("Listar (4)\n");
         printf("Buscar un empleado (5)\n");
-        printf("Salir (6)\n");
+        printf("Guardar en archivo (6)\n");
+        printf("Salir (7)\n");
         printf("-----------------------------------\n");
         printf("Ingrese una opción: ");
         fflush(stdout); fflush(stdin);
@@ -66,8 +69,11 @@ int main() {
                 opcion5(&data);
                 break;
             case 6:
+                opcion6(&data);
+                break;
+            case 7:
                 return 0;
-            default:  // 'opcion' no está entre 1 y 6.
+            default:  // 'opcion' no está entre 1 y 7.
                 printf("\nOpción inválida.\n");
                 break;
         }
@@ -161,6 +167,21 @@ void eliminarRepetidos(TData *data) {
     }
 }
 
+void guardarEmpleadosEnArchivo(TData *data, const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("Error al abrir el archivo para escribir.\n");
+        return;
+    }
+
+    for (int i = 0; i < data->cant; i++) {
+        fprintf(file, "%s\n", data->arreglo[i]);
+    }
+
+    fclose(file);
+    printf("\n¡Datos guardados en el archivo %s con éxito!\n", filename);
+}
+
 // Acciones ejecutadas en cada caso del switch.
 void opcion1(TData *data) {
     char apellido[LMAX];
@@ -249,4 +270,8 @@ void opcion5(TData *data) {
             printf("\nEl apellido '%s' no existe en la lista.\n", apellido);
         } 
     }
+}
+
+void opcion6(TData *data) {
+    guardarEmpleadosEnArchivo(data, "empleados.txt");
 }
