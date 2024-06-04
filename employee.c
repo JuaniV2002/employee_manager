@@ -224,15 +224,19 @@ bool repetidos(char apellido1[LMAX], char apellido2[LMAX]){
     return strcmp(apellido1, apellido2) == 0;
 }
 
-void eliminarRepetidos(){
-    TData data;
-    char apellido[LMAX];
+void eliminarRepetidos(TData* data){
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
 
-    for (int i = 0; i < data.cant; i++){ 
-        for (int j = 0; j < data.cant; j++){
-            if (repetidos(data.arreglo[i],data.arreglo[j]) && (i != j)){
-                printf("\nEl apellido '%s' ya existe, se eliminara la primera ocurrencia del mismo.\n", apellido);
-                suprimir(&data,data.arreglo[i]);
+    for (int i = 0; i < (*data).cant; i++){ 
+        for (int j = i + 1; j < (*data).cant; j++){
+            if (repetidos((*data).arreglo[i],(*data).arreglo[j])){
+                printf("\nEl apellido '%s' ya existe, se eliminara la primera ocurrencia del mismo.\n", (*data).arreglo[i]);
+                suprimir(data,(*data).arreglo[i]);
+                j--;  // Decrementar j para compensar el elemento eliminado
             }
         }
     }
