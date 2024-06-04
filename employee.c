@@ -123,13 +123,29 @@ void insertar(TData* data, char apellido[LMAX]){
     (*data).cant++; 
 }
 
-void suprimir(TData* data,char apellido[LMAX]){
-    // muevo un lugar para atras todos los apellidos, pisando el apellido que queria borrar.
-    for (int j = encontrar(data,apellido); j < (*data).cant; j++){
+void suprimir(TData* data, char apellido[LMAX]){
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
+
+    // Encontrar el apellido en el arreglo
+    int index = encontrar(data, apellido);
+
+    // Verificar si el apellido se encontró
+    if (index == -1) {
+        printf("Error: El apellido '%s' no se encontró.\n", apellido);
+        return;
+    }
+
+    // Mover un lugar para atrás todos los apellidos, pisando el apellido que quería borrar
+    for (int j = index; j < (*data).cant - 1; j++){
         strcpy((*data).arreglo[j], (*data).arreglo[j + 1]);
     }
+
     printf("\nEl apellido '%s' fue dado de baja exitosamente.\n", apellido); 
-    (*data).cant--;  // decremento el campo 'cant' del registro porque elimine un apellido.
+    (*data).cant--;  // Decrementar el campo 'cant' del registro porque eliminé un apellido
 }
 
 void modificar(TData* data, char apellido[LMAX]){
