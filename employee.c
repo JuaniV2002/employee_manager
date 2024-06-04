@@ -5,6 +5,7 @@
 
 #define NMAX 1001
 #define LMAX 31
+#define MAX_APELLIDOS 100
 
 typedef struct data{
     char arreglo[NMAX][LMAX];
@@ -100,8 +101,24 @@ bool llena(TData* data){
 }
 
 void insertar(TData* data, char apellido[LMAX]){
-    // inserto el apellido ingresado por el usuario en el lugar correcto.
-    strcpy((*data).arreglo[(*data).cant], apellido);
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
+
+    // Verificar si hay espacio para un nuevo apellido
+    if ((*data).cant >= MAX_APELLIDOS) {
+        printf("Error: No hay espacio para más apellidos.\n");
+        return;
+    }
+
+    // Copiar el apellido al arreglo
+    strncpy((*data).arreglo[(*data).cant], apellido, LMAX - 1);
+
+    // Asegurarse de que la cadena esté terminada correctamente
+    (*data).arreglo[(*data).cant][LMAX - 1] = '\0';
+
     printf("\nEl apellido '%s' fue registrado exitosamente.\n", apellido);
     (*data).cant++; 
 }
