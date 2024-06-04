@@ -11,26 +11,23 @@ typedef struct data{
     int cant;
 }TData;
 
-TData data;
-char apellido[LMAX];
-
 //perfil de las funciones y acciones
-bool Vacia(TData* data);  // devuelve true si la lista de apellidos esta vacia.
-bool Llena(TData* data);  // devuelve true si la lista de apellidos esta llena. 
-void Insertar(TData* data, char apellido[LMAX]);  // inserta un nuevo apellido a la lista.
-void Suprimir(TData* data, char apellido[LMAX]);  // elimina un apellido de la lista.
-void Modificar(TData* data, char apellido[LMAX]);  // dado un apellido, modifica el antiguo apellido por el nuevo apellido.
-void Mostrar(TData* data);  // muestra todos los apellidos guardados en la lista.
-int Encontrar(TData* data, char apellido[LMAX]);  // dado un apellido, devuelve su ubicacion en la lista.
-bool Repetidos(char apellido1[LMAX], char apellido2[LMAX]);  // si dos apellidos esta repetidos en la lista, devuelve verdadero.
-void EliminarRepetidos();  // accion que se encargara de elminar apellidos repetidos.
+bool vacia(TData* data);  // devuelve true si la lista de apellidos esta vacia.
+bool llena(TData* data);  // devuelve true si la lista de apellidos esta llena. 
+void insertar(TData* data, char apellido[LMAX]);  // inserta un nuevo apellido a la lista.
+void suprimir(TData* data, char apellido[LMAX]);  // elimina un apellido de la lista.
+void modificar(TData* data, char apellido[LMAX]);  // dado un apellido, modifica el antiguo apellido por el nuevo apellido.
+void mostrar(TData* data);  // muestra todos los apellidos guardados en la lista.
+int encontrar(TData* data, char apellido[LMAX]);  // dado un apellido, devuelve su ubicacion en la lista.
+bool repetidos(char apellido1[LMAX], char apellido2[LMAX]);  // si dos apellidos esta repetidos en la lista, devuelve verdadero.
+void eliminarRepetidos();  // accion que se encargara de elminar apellidos repetidos.
 
 // perfil de las acciones que seran ejectudas en cada case del switch.
-void Opcion1();
-void Opcion2();
-void Opcion3();
-void Opcion4();
-void Opcion5();
+void opcion1();
+void opcion2();
+void opcion3();
+void opcion4();
+void opcion5();
 
 int main() {
     int opcion;
@@ -53,23 +50,23 @@ int main() {
         // sentencia switch que interpretara la opcion elegida por el usuario.
         switch (opcion){
             case 1:
-                Opcion1();    
+                opcion1();    
                 break;
 
             case 2:
-                Opcion2();
+                opcion2();
                 break;
 
             case 3:
-                Opcion3();
+                opcion3();
                 break;
 
             case 4: 
-                Opcion4();
+                opcion4();
                 break;
 
             case 5:
-                Opcion5();
+                opcion5();
                 break;
 
             case 6:
@@ -84,7 +81,7 @@ int main() {
 }
 
 // cuerpo de las funciones y acciones.
-bool Vacia(TData* data){
+bool vacia(TData* data){
     // si la cantidad de elementos del arreglo es 0, devuelve verdadero.
     if ((*data).cant == 0){
         return true;
@@ -93,7 +90,7 @@ bool Vacia(TData* data){
     }
 }
 
-bool Llena(TData* data){
+bool llena(TData* data){
     // si la cantidad de elementos del arrelgo es igual a NMAX, devuelve verdadero.
     if ((*data).cant == NMAX){
         return true;
@@ -102,33 +99,33 @@ bool Llena(TData* data){
     }
 }
 
-void Insertar(TData* data, char apellido[LMAX]){
+void insertar(TData* data, char apellido[LMAX]){
     // inserto el apellido ingresado por el usuario en el lugar correcto.
     strcpy((*data).arreglo[(*data).cant], apellido);
     printf("\nEl apellido '%s' fue registrado exitosamente.\n", apellido);
     (*data).cant++; 
 }
 
-void Suprimir(TData* data,char apellido[LMAX]){
+void suprimir(TData* data,char apellido[LMAX]){
     // muevo un lugar para atras todos los apellidos, pisando el apellido que queria borrar.
-    for (int j = Encontrar(data,apellido); j < (*data).cant; j++){
+    for (int j = encontrar(data,apellido); j < (*data).cant; j++){
         strcpy((*data).arreglo[j], (*data).arreglo[j + 1]);
     }
     printf("\nEl apellido '%s' fue dado de baja exitosamente.\n", apellido); 
     (*data).cant--;  // decremento el campo 'cant' del registro porque elimine un apellido.
 }
 
-void Modificar(TData* data, char apellido[LMAX]){
+void modificar(TData* data, char apellido[LMAX]){
     char apellidoM[LMAX];
     
     printf("\nIngrese apellido modificado: ");
     scanf(" %[^\n]s", apellidoM);
     // usando Encontrar(), encuentro el indice en donde se encuentra el apellido a modificar
-    strcpy((*data).arreglo[Encontrar(data, apellido)], apellidoM);
+    strcpy((*data).arreglo[encontrar(data, apellido)], apellidoM);
     printf("\nSe ha modificado '%s' por '%s' exitosamente.\n", apellido, apellidoM);
 }
 
-void Mostrar(TData* data){
+void mostrar(TData* data){
     // recorro el arreglo mostrando cada apellido.
     printf("\nApellidos:\n"); 
     for (int i = 0; i < (*data).cant; i++){
@@ -136,7 +133,8 @@ void Mostrar(TData* data){
     }
 }
 
-int Encontrar(TData* data, char apellido[LMAX]){
+int encontrar(TData* data, char apellido[LMAX]){
+
     // recorro el arreglo chequeando si el apellido en el lugar 'i' del arreglo es igual que el que estoy buscando.
     for (int i = 0; i < (*data).cant; i++){
         if(strcmp((*data).arreglo[i], apellido) == 0){
@@ -147,7 +145,7 @@ int Encontrar(TData* data, char apellido[LMAX]){
     return -1;
 }
 
-bool Repetidos(char apellido1[LMAX], char apellido2[LMAX]){
+bool repetidos(char apellido1[LMAX], char apellido2[LMAX]){
     // si ambos apellidos son iguales, devuelvo verdadero.
     if (strcmp(apellido1, apellido2) == 0){
         return true;
@@ -156,20 +154,26 @@ bool Repetidos(char apellido1[LMAX], char apellido2[LMAX]){
     }
 }
 
-void EliminarRepetidos(){
+void eliminarRepetidos(){
+    TData data;
+    char apellido[LMAX];
+
     for (int i = 0; i < data.cant; i++){ 
         for (int j = 0; j < data.cant; j++){
-            if (Repetidos(data.arreglo[i],data.arreglo[j]) && (i != j)){
+            if (repetidos(data.arreglo[i],data.arreglo[j]) && (i != j)){
                 printf("\nEl apellido '%s' ya existe, se eliminara la primera ocurrencia del mismo.\n", apellido);
-                Suprimir(&data,data.arreglo[i]);
+                suprimir(&data,data.arreglo[i]);
             }
         }
     }
 }
 
 // acciones que son ejecutadas en cada caso del switch.
-void Opcion1(){
-    if (Llena(&data) == true){
+void opcion1(){
+    TData data;
+    char apellido[LMAX];
+
+    if (llena(&data) == true){
         printf("\nNo se pueden añadir mas empleados.\n");
     }else{
         // si la lista no esta llena, leo el apellido ingresado.
@@ -182,13 +186,16 @@ void Opcion1(){
                 printf("\nEl apellido debe tener como maximo 30 caracteres.\n");
             }
         } while (strlen(apellido) > LMAX);
-        Insertar(&data, apellido);
-        EliminarRepetidos();
+        insertar(&data, apellido);
+        eliminarRepetidos();
     }
 }
 
-void Opcion2(){
-    if (Vacia(&data) == true){
+void opcion2(){
+    TData data;
+    char apellido[LMAX];
+
+    if (vacia(&data) == true){
         printf("\nNo hay apellidos en la lista.\n");
     }else{
         // si la lista no esta vacia, leo el apellido ingresado.
@@ -201,16 +208,19 @@ void Opcion2(){
             }
         } while (strlen(apellido) > LMAX);
         // verifico que el apellido existe usando la funcion Encontrar().
-        if (Encontrar(&data, apellido) != -1){
-            Suprimir(&data, apellido); 
+        if (encontrar(&data, apellido) != -1){
+            suprimir(&data, apellido); 
         }else{
             printf("\nEl apellido '%s' no existe en la lista.\n", apellido);
         }
     }
 }
 
-void Opcion3(){
-    if (Vacia(&data) == true){
+void opcion3(){
+    TData data;
+    char apellido[LMAX];
+
+    if (vacia(&data) == true){
         printf("\nNo hay apellidos en la lista.\n");
     }else{
         // si la lista no esta vacia, leo el apellido a modificar.
@@ -223,26 +233,32 @@ void Opcion3(){
             }
         } while (strlen(apellido) > LMAX);
         // verifico que el apellido existe usando la funcion Encontrar().
-        if (Encontrar(&data, apellido) != -1){
-            Modificar(&data, apellido);
+        if (encontrar(&data, apellido) != -1){
+            modificar(&data, apellido);
         }else{
             printf("\nEl apellido '%s' no existe en la lista.\n", apellido);
         }
-        EliminarRepetidos();   
+        eliminarRepetidos();   
     }
 }
 
-void Opcion4(){
-    if (Vacia(&data) == true){
+void opcion4(){
+    TData data;
+
+    if (vacia(&data) == true){
         printf("\nNo hay apellidos en la lista.\n");
     }else{
         // muestro los apellidos si la lista tiene al menos un apellido guardado.
-        Mostrar(&data);
+        mostrar(&data);
     }
 }
 
-void Opcion5(){
-    if (Vacia(&data) == true){
+void opcion5(){
+    TData data;
+    char apellido[LMAX];
+    
+
+    if (vacia(&data) == true){
         printf("\nNo hay apellidos en la lista.\n");
     }else{
         do{
@@ -254,8 +270,8 @@ void Opcion5(){
             }
         } while (strlen(apellido) > LMAX);
         // verifico que el apellido existe usando la funcion Encontrar().
-        if (Encontrar(&data, apellido) != -1){
-            printf("\nEl apellido '%s' se encuentra en la posicion %d.\n", apellido, Encontrar(&data, apellido));
+        if (encontrar(&data, apellido) != -1){
+            printf("\nEl apellido '%s' se encuentra en la posicion %d.\n", apellido, encontrar(&data, apellido));
         }else{
             printf("\nEl apellido '%s' no existe en la lista.\n", apellido);
         } 
