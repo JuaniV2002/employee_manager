@@ -21,17 +21,18 @@ void modificar(TData* data, char apellido[LMAX]);  // dado un apellido, modifica
 void mostrar(TData* data);  // muestra todos los apellidos guardados en la lista.
 int encontrar(TData* data, char apellido[LMAX]);  // dado un apellido, devuelve su ubicacion en la lista.
 bool repetidos(char apellido1[LMAX], char apellido2[LMAX]);  // si dos apellidos esta repetidos en la lista, devuelve verdadero.
-void eliminarRepetidos();  // accion que se encargara de elminar apellidos repetidos.
+void eliminarRepetidos(TData* data);  // accion que se encargara de elminar apellidos repetidos.
 
 // perfil de las acciones que seran ejectudas en cada case del switch.
-void opcion1();
-void opcion2();
-void opcion3();
-void opcion4();
-void opcion5();
+void opcion1(TData* data);
+void opcion2(TData* data);
+void opcion3(TData* data);
+void opcion4(TData* data);
+void opcion5(TData* data);
 
 int main() {
     int opcion;
+    TData data;
 
     do{
         // esto se repetira cada vez que el usuario ingrese al programa o que se termine de correr un comando (1-5).
@@ -51,23 +52,23 @@ int main() {
         // sentencia switch que interpretara la opcion elegida por el usuario.
         switch (opcion){
             case 1:
-                opcion1();    
+                opcion1(&data);    
                 break;
 
             case 2:
-                opcion2();
+                opcion2(&data);
                 break;
 
             case 3:
-                opcion3();
+                opcion3(&data);
                 break;
 
             case 4: 
-                opcion4();
+                opcion4(&data);
                 break;
 
             case 5:
-                opcion5();
+                opcion5(&data);
                 break;
 
             case 6:
@@ -243,11 +244,16 @@ void eliminarRepetidos(TData* data){
 }
 
 // acciones que son ejecutadas en cada caso del switch.
-void opcion1(){
-    TData data;
+void opcion1(TData* data){
     char apellido[LMAX];
 
-    if (llena(&data) == true){
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
+
+    if (llena(data) == true){
         printf("\nNo se pueden añadir mas empleados.\n");
     }else{
         // si la lista no esta llena, leo el apellido ingresado.
@@ -260,16 +266,21 @@ void opcion1(){
                 printf("\nEl apellido debe tener como maximo 30 caracteres.\n");
             }
         } while (strlen(apellido) > LMAX);
-        insertar(&data, apellido);
-        eliminarRepetidos();
+        insertar(data, apellido);
+        eliminarRepetidos(data);
     }
 }
 
-void opcion2(){
-    TData data;
+void opcion2(TData* data){
     char apellido[LMAX];
 
-    if (vacia(&data) == true){
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
+
+    if (vacia(data) == true){
         printf("\nNo hay apellidos en la lista.\n");
     }else{
         // si la lista no esta vacia, leo el apellido ingresado.
@@ -282,19 +293,24 @@ void opcion2(){
             }
         } while (strlen(apellido) > LMAX);
         // verifico que el apellido existe usando la funcion Encontrar().
-        if (encontrar(&data, apellido) != -1){
-            suprimir(&data, apellido); 
+        if (encontrar(data, apellido) != -1){
+            suprimir(data, apellido); 
         }else{
             printf("\nEl apellido '%s' no existe en la lista.\n", apellido);
         }
     }
 }
 
-void opcion3(){
-    TData data;
+void opcion3(TData* data){
     char apellido[LMAX];
 
-    if (vacia(&data) == true){
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
+
+    if (vacia(data) == true){
         printf("\nNo hay apellidos en la lista.\n");
     }else{
         // si la lista no esta vacia, leo el apellido a modificar.
@@ -307,32 +323,41 @@ void opcion3(){
             }
         } while (strlen(apellido) > LMAX);
         // verifico que el apellido existe usando la funcion Encontrar().
-        if (encontrar(&data, apellido) != -1){
-            modificar(&data, apellido);
+        if (encontrar(data, apellido) != -1){
+            modificar(data, apellido);
         }else{
             printf("\nEl apellido '%s' no existe en la lista.\n", apellido);
         }
-        eliminarRepetidos();   
+        eliminarRepetidos(data);   
     }
 }
 
-void opcion4(){
-    TData data;
+void opcion4(TData* data){
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
 
-    if (vacia(&data) == true){
+    if (vacia(data) == true){
         printf("\nNo hay apellidos en la lista.\n");
     }else{
         // muestro los apellidos si la lista tiene al menos un apellido guardado.
-        mostrar(&data);
+        mostrar(data);
     }
 }
 
-void opcion5(){
-    TData data;
+void opcion5(TData* data){
     char apellido[LMAX];
-    
+    int pos;
 
-    if (vacia(&data) == true){
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
+
+    if (vacia(data) == true){
         printf("\nNo hay apellidos en la lista.\n");
     }else{
         do{
@@ -344,8 +369,9 @@ void opcion5(){
             }
         } while (strlen(apellido) > LMAX);
         // verifico que el apellido existe usando la funcion Encontrar().
-        if (encontrar(&data, apellido) != -1){
-            printf("\nEl apellido '%s' se encuentra en la posicion %d.\n", apellido, encontrar(&data, apellido));
+        pos = encontrar(data, apellido);
+        if (pos != -1){
+            printf("\nEl apellido '%s' se encuentra en la posicion %d.\n", apellido, pos);
         }else{
             printf("\nEl apellido '%s' no existe en la lista.\n", apellido);
         } 
