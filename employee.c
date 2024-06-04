@@ -176,7 +176,19 @@ void modificar(TData* data, char apellido[LMAX]){
 }
 
 void mostrar(TData* data){
-    // recorro el arreglo mostrando cada apellido.
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
+
+    // Verificar si hay apellidos para mostrar
+    if ((*data).cant == 0) {
+        printf("No hay apellidos para mostrar.\n");
+        return;
+    }
+
+    // Recorrer el arreglo mostrando cada apellido
     printf("\nApellidos:\n"); 
     for (int i = 0; i < (*data).cant; i++){
         printf("- %s\n", (*data).arreglo[i]);
@@ -184,7 +196,6 @@ void mostrar(TData* data){
 }
 
 int encontrar(TData* data, char apellido[LMAX]){
-
     // recorro el arreglo chequeando si el apellido en el lugar 'i' del arreglo es igual que el que estoy buscando.
     for (int i = 0; i < (*data).cant; i++){
         if(strcmp((*data).arreglo[i], apellido) == 0){
