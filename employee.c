@@ -149,12 +149,29 @@ void suprimir(TData* data, char apellido[LMAX]){
 }
 
 void modificar(TData* data, char apellido[LMAX]){
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return;
+    }
+
+    // Encontrar el apellido en el arreglo
+    int index = encontrar(data, apellido);
+
+    // Verificar si el apellido se encontró
+    if (index == -1) {
+        printf("Error: El apellido '%s' no se encontró.\n", apellido);
+        return;
+    }
+
     char apellidoM[LMAX];
     
     printf("\nIngrese apellido modificado: ");
     scanf(" %[^\n]s", apellidoM);
-    // usando Encontrar(), encuentro el indice en donde se encuentra el apellido a modificar
-    strcpy((*data).arreglo[encontrar(data, apellido)], apellidoM);
+
+    // Reemplazar el apellido en el arreglo
+    strcpy((*data).arreglo[index], apellidoM);
+
     printf("\nSe ha modificado '%s' por '%s' exitosamente.\n", apellido, apellidoM);
 }
 
