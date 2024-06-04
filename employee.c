@@ -196,23 +196,32 @@ void mostrar(TData* data){
 }
 
 int encontrar(TData* data, char apellido[LMAX]){
-    // recorro el arreglo chequeando si el apellido en el lugar 'i' del arreglo es igual que el que estoy buscando.
+    // Verificar si data es NULL
+    if (data == NULL) {
+        printf("Error: data es NULL.\n");
+        return -1;
+    }
+
+    // Verificar si hay apellidos para buscar
+    if ((*data).cant == 0) {
+        printf("No hay apellidos para buscar.\n");
+        return -1;
+    }
+
+    // Recorrer el arreglo buscando el apellido
     for (int i = 0; i < (*data).cant; i++){
         if(strcmp((*data).arreglo[i], apellido) == 0){
-            return i;  //si lo encontre, devuelvo el indice en donde se encuetra dicho apellido.
+            return i;  // Si lo encontré, devuelvo el índice en donde se encuentra dicho apellido.
         }
     }
-    // si no lo encontre, devuelvo un codigo de error.
+
+    // Si no lo encontré, devuelvo un código de error.
     return -1;
 }
 
 bool repetidos(char apellido1[LMAX], char apellido2[LMAX]){
-    // si ambos apellidos son iguales, devuelvo verdadero.
-    if (strcmp(apellido1, apellido2) == 0){
-        return true;
-    }else{
-        return false;
-    }
+    // Devolver verdadero si ambos apellidos son iguales, falso en caso contrario.
+    return strcmp(apellido1, apellido2) == 0;
 }
 
 void eliminarRepetidos(){
