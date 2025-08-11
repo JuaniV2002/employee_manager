@@ -1,4 +1,4 @@
-# Employee Manager (English UI)
+# Employee Manager
 
 This C program manages a list of employee surnames. The codebase and all prompts are in English. It uses a simple CSV format and auto-loads data from `employee.csv`.
 
