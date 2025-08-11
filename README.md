@@ -1,6 +1,6 @@
 # Employee Manager (English UI)
 
-This C program manages a list of employee surnames. The codebase and all prompts are now in English. It auto-loads data from `employees.txt` (or legacy `empleados.txt`) and lets you add, remove, modify, search, and list surnames.
+This C program manages a list of employee surnames. The codebase and all prompts are in English. It uses a simple CSV format and auto-loads data from `employee.csv`.
 
 ## Features
 
@@ -10,7 +10,7 @@ This C program manages a list of employee surnames. The codebase and all prompts
 - List surnames (with indexes)
 - Search a surname (shows position)
 - Save to file
-- Auto-load on startup (from file)
+- Auto-load on startup from CSV
  
 New user-facing enhancements:
 - Case-insensitive exact search with normalized title-casing
@@ -28,7 +28,8 @@ New user-facing enhancements:
 - Safe input handling (`fgets` + length validation)
 - Handles unexpected EOF or invalid input (e.g. `Ctrl+D`) gracefully
 
-Backward compatibility: on startup it tries `employees.txt`, then falls back to `empleados.txt` if present.
+Storage format:
+- CSV file: `employee.csv` with a header line `surname` and one surname per row.
 
 ## Getting Started
 
@@ -57,6 +58,9 @@ gcc -o employee employee.c
 ```bash
 ./employee
 
+Sample data:
+- `employee.csv` is included with 10 sample surnames so you can test immediately.
+
 Menu options:
 1. Add employee
 2. Remove employee
@@ -65,7 +69,7 @@ Menu options:
 5. Search surname (exact)
 6. Find by substring
 7. Sort surnames (A-Z)
-8. Save to file
-9. Save to file as...
+8. Save to CSV
+9. Save to CSV as...
 10. Exit
 ```

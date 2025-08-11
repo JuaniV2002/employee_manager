@@ -36,6 +36,8 @@ void sortSurnames(EmployeeData *data);
 void saveEmployeesToFileAs(EmployeeData *data);
 void searchBySubstring(EmployeeData *data);
 int promptSaveIfDirty(EmployeeData *data);
+// Forward declaration for helper used in CSV loader
+static void toLowerCopy(char *dst, const char *src, size_t n);
 
 // Actions
 void actionAddEmployee(EmployeeData *data);
@@ -51,8 +53,8 @@ int main() {
     data.count = 0;
     data.dirty = false;
 
-    // Load from English filename; if not found, attempt Spanish legacy filename
-    loadEmployeesFromFile(&data, "employees.txt", "empleados.txt");
+    // Load from CSV only
+    loadEmployeesFromFile(&data, "employee.csv", NULL);
 
     do {
         printf("\n-----------------------------------\n");
@@ -63,8 +65,8 @@ int main() {
     printf("Search surname (exact) (5)\n");
     printf("Find by substring (6)\n");
     printf("Sort surnames (A-Z) (7)\n");
-    printf("Save to file (8)\n");
-    printf("Save to file as... (9)\n");
+    printf("Save to CSV (8)\n");
+    printf("Save to CSV as... (9)\n");
     printf("Exit (10)\n");
         printf("-----------------------------------\n");
         printf("Enter an option: ");
@@ -226,6 +228,8 @@ void saveEmployeesToFile(EmployeeData *data, const char *filename) {
         printf("Error opening file for writing.\n");
         return;
     }
+    // CSV format with header 'surname'
+    fprintf(file, "surname\n");
     for (int i = 0; i < data->count; i++) {
         fprintf(file, "%s\n", data->surnames[i]);
     }
@@ -235,14 +239,23 @@ void saveEmployeesToFile(EmployeeData *data, const char *filename) {
 }
 
 void loadEmployeesFromFile(EmployeeData *data, const char *preferredFilename, const char *fallbackFilename) {
+    (void)fallbackFilename; // unused
     FILE *file = fopen(preferredFilename, "r");
-    if (!file && fallbackFilename) {
-        file = fopen(fallbackFilename, "r");
-    }
     if (!file) return;
     data->count = 0;
-    while (data->count < NMAX && fgets(data->surnames[data->count], LMAX, file)) {
-        trimNewline(data->surnames[data->count]);
+    char line[LMAX * 2];
+    while (data->count < NMAX && fgets(line, sizeof(line), file)) {
+        trimNewline(line);
+        if (line[0] == '\0') continue;
+        // Skip CSV header 'surname'
+        char lower[LMAX * 2];
+        toLowerCopy(lower, line, sizeof(lower));
+        if (strcmp(lower, "surname") == 0) continue;
+        // If CSV, take first column; else whole line
+        char *comma = strchr(line, ',');
+        if (comma) *comma = '\0';
+        strncpy(data->surnames[data->count], line, LMAX - 1);
+        data->surnames[data->count][LMAX - 1] = '\0';
         normalizeSurname(data->surnames[data->count]);
         data->count++;
     }
@@ -325,7 +338,7 @@ void actionSearchEmployee(EmployeeData *data) {
 }
 
 void actionSaveToFile(EmployeeData *data) {
-    saveEmployeesToFile(data, "employees.txt");
+    saveEmployeesToFile(data, "employee.csv");
 }
 
 // ===== Additional enhancements implementation =====
@@ -465,7 +478,7 @@ int promptSaveIfDirty(EmployeeData *data) {
     if (scanf(" %c", &c) != 1) return 0;
     getchar();
     if (c == 'y' || c == 'Y') {
-        saveEmployeesToFile(data, "employees.txt");
+        saveEmployeesToFile(data, "employee.csv");
         return 1;
     } else if (c == 'n' || c == 'N') {
         return 1;
