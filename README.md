@@ -1,43 +1,48 @@
-# Employee Manager
+# Employee Manager (English UI)
 
-This **C** program allows you to manage a list of **employee surnames**. It's ideal for small HR systems, academic exercises, or any situation where surname tracking is required.
+This C program manages a list of employee surnames. The codebase and all prompts are now in English. It auto-loads data from `employees.txt` (or legacy `empleados.txt`) and lets you add, remove, modify, search, and list surnames.
 
 ## Features
 
-- **_Alta de empleado_ (Register employee):** Adds a new surname to the list.
-- **_Baja de empleado_ (Delete employee):** Removes a surname from the list, with confirmation.
-- **_Modificar empleado_ (Modify employee):** Modifies a surname, with input validation.
-- **_Listar_ (List surnames):** Displays all current surnames with index numbers.
-- **_Buscar empleado_ (Search):** Finds the position of a given surname.
-- **_Guardar en archivo_ (Save to file):** Saves all surnames to a plain text file.
-- **_Carga automática_ (Auto-load):** Automatically loads existing surnames at program startup from file.
+- Add employee
+- Remove employee (with confirmation)
+- Modify employee surname (with validation)
+- List surnames (with indexes)
+- Search a surname (shows position)
+- Save to file
+- Auto-load on startup (from file)
+ 
+New user-facing enhancements:
+- Case-insensitive exact search with normalized title-casing
+- Substring search (case-insensitive)
+- Sort surnames A–Z
+- Save As… to choose a filename
+- Unsaved changes prompt on exit
 
 ## Improvements
 
-- ✅ Input validation: only allows surnames with letters and spaces, up to 30 characters.
-- ✅ Cleans newline and carriage return characters (compatible with macOS/Linux terminals).
-- ✅ Index shown on listing for easy reference.
-- ✅ Prevents duplicate entries (`eliminarRepetidos`).
-- ✅ Safe input handling (`fgets` + length validation).
-- ✅ Handles unexpected EOF or invalid input (e.g. `Ctrl+D`) gracefully.
+- Input validation: only letters and spaces, up to 30 characters
+- Cleans newline and carriage return characters (macOS/Linux friendly)
+- Index shown for easy reference
+- Prevents duplicate entries
+- Safe input handling (`fgets` + length validation)
+- Handles unexpected EOF or invalid input (e.g. `Ctrl+D`) gracefully
+
+Backward compatibility: on startup it tries `employees.txt`, then falls back to `empleados.txt` if present.
 
 ## Getting Started
 
-To give this program a try on **Linux**:
+To try this program on macOS or Linux:
 
 ```bash
 sudo apt update
 sudo apt install build-essential
 ```
-or if you are on mac using homebrew:
-  
+On macOS (Homebrew):
+
 ```bash
 brew update
 brew install gcc
-```
-Verify the compiler is available:
-  
-```bash
 gcc --version
 ```
 
@@ -51,4 +56,16 @@ gcc -o employee employee.c
   
 ```bash
 ./employee
+
+Menu options:
+1. Add employee
+2. Remove employee
+3. Modify employee surname
+4. List employees
+5. Search surname (exact)
+6. Find by substring
+7. Sort surnames (A-Z)
+8. Save to file
+9. Save to file as...
+10. Exit
 ```

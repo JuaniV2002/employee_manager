@@ -1,4 +1,4 @@
-// Enhanced Employee Manager with EOF Handling and Robust Validation
+// Enhanced Employee Manager (English) with EOF Handling and Robust Validation
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -11,276 +11,466 @@
 #define RED "\033[1;31m"
 #define RESET "\033[0m"
 
-typedef struct data {
-    char arreglo[NMAX][LMAX];
-    int cant;
-} TData;
+typedef struct {
+    char surnames[NMAX][LMAX];
+    int count;
+    bool dirty; // track unsaved changes
+} EmployeeData;
 
-// Funciones básicas
-bool vacia(TData *data);
-bool llena(TData *data);
-void insertar(TData *data, char apellido[LMAX]);
-void suprimir(TData *data, char apellido[LMAX]);
-void modificar(TData *data, char apellido[LMAX]);
-void mostrar(TData *data);
-int encontrar(TData *data, char apellido[LMAX]);
-bool repetidos(char apellido1[LMAX], char apellido2[LMAX]);
-void eliminarRepetidos(TData *data);
-void guardarEmpleadosEnArchivo(TData *data, const char *filename);
-void cargarEmpleadosDesdeArchivo(TData *data, const char *filename);
-bool apellidoValido(const char apellido[]);
-void limpiarEntrada(char *input);
+// Basic operations
+bool isEmpty(EmployeeData *data);
+bool isFull(EmployeeData *data);
+void addEmployee(EmployeeData *data, char surname[LMAX]);
+void deleteEmployee(EmployeeData *data, char surname[LMAX]);
+void updateEmployeeSurname(EmployeeData *data, char surname[LMAX]);
+void listEmployees(EmployeeData *data);
+int findSurname(EmployeeData *data, char surname[LMAX]);
+bool isDuplicate(char surname1[LMAX], char surname2[LMAX]);
+void removeDuplicates(EmployeeData *data);
+void saveEmployeesToFile(EmployeeData *data, const char *filename);
+void loadEmployeesFromFile(EmployeeData *data, const char *preferredFilename, const char *fallbackFilename);
+bool isValidSurname(const char surname[]);
+void trimNewline(char *input);
+void normalizeSurname(char *surname);
+void sortSurnames(EmployeeData *data);
+void saveEmployeesToFileAs(EmployeeData *data);
+void searchBySubstring(EmployeeData *data);
+int promptSaveIfDirty(EmployeeData *data);
 
-// Acciones
-void opcion1(TData *data);
-void opcion2(TData *data);
-void opcion3(TData *data);
-void opcion4(TData *data);
-void opcion5(TData *data);
-void opcion6(TData *data);
-void opcion7(TData *data);
+// Actions
+void actionAddEmployee(EmployeeData *data);
+void actionDeleteEmployee(EmployeeData *data);
+void actionModifyEmployee(EmployeeData *data);
+void actionListEmployees(EmployeeData *data);
+void actionSearchEmployee(EmployeeData *data);
+void actionSaveToFile(EmployeeData *data);
 
 int main() {
-    int opcion;
-    TData data;
-    data.cant = 0;
+    int option;
+    EmployeeData data;
+    data.count = 0;
+    data.dirty = false;
 
-    cargarEmpleadosDesdeArchivo(&data, "empleados.txt");
+    // Load from English filename; if not found, attempt Spanish legacy filename
+    loadEmployeesFromFile(&data, "employees.txt", "empleados.txt");
 
     do {
         printf("\n-----------------------------------\n");
-        printf("Alta de empleado (1)\n");
-        printf("Baja de empleado (2)\n");
-        printf("Modificar datos de empleado (3)\n");
-        printf("Listar (4)\n");
-        printf("Buscar un empleado (5)\n");
-        printf("Guardar en archivo (6)\n");
-        printf("Salir (7)\n");
+        printf("Add employee (1)\n");
+        printf("Remove employee (2)\n");
+        printf("Modify employee surname (3)\n");
+    printf("List employees (4)\n");
+    printf("Search surname (exact) (5)\n");
+    printf("Find by substring (6)\n");
+    printf("Sort surnames (A-Z) (7)\n");
+    printf("Save to file (8)\n");
+    printf("Save to file as... (9)\n");
+    printf("Exit (10)\n");
         printf("-----------------------------------\n");
-        printf("Ingrese una opci\u00f3n: ");
-        scanf("%d", &opcion);
-        getchar(); // limpia salto de línea
+        printf("Enter an option: ");
+        if (scanf("%d", &option) != 1) {
+            printf("\nInvalid input. Exiting.\n");
+            return 0;
+        }
+        getchar(); // consume newline
 
-        switch (opcion) {
-            case 1: opcion1(&data); break;
-            case 2: opcion2(&data); break;
-            case 3: opcion3(&data); break;
-            case 4: opcion4(&data); break;
-            case 5: opcion5(&data); break;
-            case 6: opcion6(&data); break;
-            case 7: return 0;
+        switch (option) {
+            case 1: actionAddEmployee(&data); break;
+            case 2: actionDeleteEmployee(&data); break;
+            case 3: actionModifyEmployee(&data); break;
+            case 4: actionListEmployees(&data); break;
+            case 5: actionSearchEmployee(&data); break;
+            case 6: searchBySubstring(&data); break;
+            case 7: sortSurnames(&data); break;
+            case 8: actionSaveToFile(&data); break;
+            case 9: saveEmployeesToFileAs(&data); break;
+            case 10:
+                if (promptSaveIfDirty(&data)) {
+                    return 0;
+                }
+                break;
             default:
-                printf("\nOpci\u00f3n inv\u00e1lida.\n");
+                printf("\nInvalid option.\n");
         }
     } while (1);
 }
 
-bool vacia(TData *data) {
-    return data->cant == 0;
+bool isEmpty(EmployeeData *data) {
+    return data->count == 0;
 }
 
-bool llena(TData *data) {
-    return data->cant == NMAX;
+bool isFull(EmployeeData *data) {
+    return data->count == NMAX;
 }
 
-void limpiarEntrada(char *input) {
+void trimNewline(char *input) {
     input[strcspn(input, "\n\r")] = 0;
 }
 
-bool apellidoValido(const char apellido[]) {
-    if (strlen(apellido) == 0) return false;
-    for (int i = 0; apellido[i] != '\0'; i++) {
-        if (!isalpha(apellido[i]) && apellido[i] != ' ') {
+bool isValidSurname(const char surname[]) {
+    if (strlen(surname) == 0) return false;
+    for (int i = 0; surname[i] != '\0'; i++) {
+        if (!isalpha((unsigned char)surname[i]) && surname[i] != ' ') {
             return false;
         }
     }
     return true;
 }
 
-void insertar(TData *data, char apellido[LMAX]) {
-    if (llena(data)) {
-        printf("Error: No hay espacio para m\u00e1s apellidos.\n");
+void addEmployee(EmployeeData *data, char surname[LMAX]) {
+    if (isFull(data)) {
+        printf("Error: No more space for additional surnames.\n");
         return;
     }
-    strncpy(data->arreglo[data->cant], apellido, LMAX - 1);
-    data->arreglo[data->cant][LMAX - 1] = '\0';
-    printf("\n%sEl apellido '%s' fue registrado exitosamente.%s\n", GREEN, apellido, RESET);
-    data->cant++;
+    normalizeSurname(surname);
+    strncpy(data->surnames[data->count], surname, LMAX - 1);
+    data->surnames[data->count][LMAX - 1] = '\0';
+    printf("\n%sThe surname '%s' was registered successfully.%s\n", GREEN, surname, RESET);
+    data->count++;
+    data->dirty = true;
 }
 
-void suprimir(TData *data, char apellido[LMAX]) {
-    int index = encontrar(data, apellido);
+void deleteEmployee(EmployeeData *data, char surname[LMAX]) {
+    int index = findSurname(data, surname);
     if (index == -1) {
-        printf("Error: El apellido '%s' no se encontr\u00f3.\n", apellido);
+        printf("Error: The surname '%s' was not found.\n", surname);
         return;
     }
-    printf("\n\u00bfEst\u00e1s seguro que quer\u00e9s eliminar '%s'? (s/n): ", apellido);
+    printf("\nAre you sure you want to delete '%s'? (y/n): ", surname);
     char confirm;
-    scanf(" %c", &confirm);
-    getchar();
-    if (confirm != 's' && confirm != 'S') {
-        printf("Eliminaci\u00f3n cancelada.\n");
+    if (scanf(" %c", &confirm) != 1) {
+        printf("Input error.\n");
         return;
     }
-    for (int j = index; j < data->cant - 1; j++) {
-        strcpy(data->arreglo[j], data->arreglo[j + 1]);
+    getchar();
+    if (confirm != 'y' && confirm != 'Y') {
+        printf("Deletion canceled.\n");
+        return;
     }
-    data->cant--;
-    printf("\n%sEl apellido '%s' fue dado de baja exitosamente.%s\n", RED, apellido, RESET);
+    for (int j = index; j < data->count - 1; j++) {
+        strcpy(data->surnames[j], data->surnames[j + 1]);
+    }
+    data->count--;
+    printf("\n%sThe surname '%s' was removed successfully.%s\n", RED, surname, RESET);
+    data->dirty = true;
 }
 
-void modificar(TData *data, char apellido[LMAX]) {
-    int index = encontrar(data, apellido);
+void updateEmployeeSurname(EmployeeData *data, char surname[LMAX]) {
+    int index = findSurname(data, surname);
     if (index == -1) {
-        printf("Error: El apellido '%s' no se encontr\u00f3.\n", apellido);
+        printf("Error: The surname '%s' was not found.\n", surname);
         return;
     }
-    char nuevoApellido[LMAX];
+    char newSurname[LMAX];
     do {
-        printf("\nIngrese apellido modificado: ");
-        if (fgets(nuevoApellido, LMAX, stdin) == NULL) {
-            printf("Error de entrada.\n");
+        printf("\nEnter the new surname: ");
+        if (fgets(newSurname, LMAX, stdin) == NULL) {
+            printf("Input error.\n");
             return;
         }
-        limpiarEntrada(nuevoApellido);
-        if (!apellidoValido(nuevoApellido)) {
-            printf("\nEl apellido debe tener solo letras y como m\u00e1ximo 30 caracteres.\n");
+        trimNewline(newSurname);
+        if (!isValidSurname(newSurname)) {
+            printf("\nThe surname must contain only letters and spaces, up to 30 characters.\n");
         }
-    } while (!apellidoValido(nuevoApellido));
-    strncpy(data->arreglo[index], nuevoApellido, LMAX - 1);
-    data->arreglo[index][LMAX - 1] = '\0';
-    printf("\nSe ha modificado '%s' por '%s' exitosamente.\n", apellido, nuevoApellido);
+    } while (!isValidSurname(newSurname));
+    normalizeSurname(newSurname);
+    strncpy(data->surnames[index], newSurname, LMAX - 1);
+    data->surnames[index][LMAX - 1] = '\0';
+    printf("\nSuccessfully changed '%s' to '%s'.\n", surname, newSurname);
+    data->dirty = true;
 }
 
-void mostrar(TData *data) {
-    if (vacia(data)) {
-        printf("No hay apellidos para mostrar.\n");
+void listEmployees(EmployeeData *data) {
+    if (isEmpty(data)) {
+        printf("There are no surnames to display.\n");
         return;
     }
-    printf("\nApellidos:\n");
-    for (int i = 0; i < data->cant; i++) {
-        printf("[%d] %s\n", i + 1, data->arreglo[i]);
+    printf("\nSurnames (total: %d):\n", data->count);
+    for (int i = 0; i < data->count; i++) {
+        printf("[%d] %s\n", i + 1, data->surnames[i]);
     }
 }
 
-int encontrar(TData *data, char apellido[LMAX]) {
-    for (int i = 0; i < data->cant; i++) {
-        if (strcmp(data->arreglo[i], apellido) == 0) {
+int findSurname(EmployeeData *data, char surname[LMAX]) {
+    char normalized[LMAX];
+    strncpy(normalized, surname, LMAX - 1);
+    normalized[LMAX - 1] = '\0';
+    normalizeSurname(normalized);
+    for (int i = 0; i < data->count; i++) {
+        if (strcmp(data->surnames[i], normalized) == 0) {
             return i;
         }
     }
     return -1;
 }
 
-bool repetidos(char apellido1[LMAX], char apellido2[LMAX]) {
-    return strcmp(apellido1, apellido2) == 0;
+bool isDuplicate(char surname1[LMAX], char surname2[LMAX]) {
+    return strcmp(surname1, surname2) == 0;
 }
 
-void eliminarRepetidos(TData *data) {
-    for (int i = 0; i < data->cant; i++) {
-        for (int j = i + 1; j < data->cant; j++) {
-            if (repetidos(data->arreglo[i], data->arreglo[j])) {
-                printf("\n%sEl apellido '%s' ya existe, se eliminar\u00e1 la primera ocurrencia.%s\n", RED, data->arreglo[i], RESET);
-                suprimir(data, data->arreglo[i]);
+void removeDuplicates(EmployeeData *data) {
+    for (int i = 0; i < data->count; i++) {
+        for (int j = i + 1; j < data->count; j++) {
+            if (isDuplicate(data->surnames[i], data->surnames[j])) {
+                printf("\n%sThe surname '%s' already exists, the first occurrence will be removed.%s\n", RED, data->surnames[i], RESET);
+                deleteEmployee(data, data->surnames[i]);
                 j--;
             }
         }
     }
 }
 
-void guardarEmpleadosEnArchivo(TData *data, const char *filename) {
+void saveEmployeesToFile(EmployeeData *data, const char *filename) {
     FILE *file = fopen(filename, "w");
     if (!file) {
-        printf("Error al abrir el archivo para escribir.\n");
+        printf("Error opening file for writing.\n");
         return;
     }
-    for (int i = 0; i < data->cant; i++) {
-        fprintf(file, "%s\n", data->arreglo[i]);
+    for (int i = 0; i < data->count; i++) {
+        fprintf(file, "%s\n", data->surnames[i]);
     }
     fclose(file);
-    printf("\n\u00a1Datos guardados en el archivo %s con \u00e9xito!\n", filename);
+    printf("\nData saved to %s successfully.\n", filename);
+    data->dirty = false;
 }
 
-void cargarEmpleadosDesdeArchivo(TData *data, const char *filename) {
-    FILE *file = fopen(filename, "r");
+void loadEmployeesFromFile(EmployeeData *data, const char *preferredFilename, const char *fallbackFilename) {
+    FILE *file = fopen(preferredFilename, "r");
+    if (!file && fallbackFilename) {
+        file = fopen(fallbackFilename, "r");
+    }
     if (!file) return;
-    data->cant = 0;
-    while (fgets(data->arreglo[data->cant], LMAX, file) && data->cant < NMAX) {
-        limpiarEntrada(data->arreglo[data->cant]);
-        data->cant++;
+    data->count = 0;
+    while (data->count < NMAX && fgets(data->surnames[data->count], LMAX, file)) {
+        trimNewline(data->surnames[data->count]);
+        normalizeSurname(data->surnames[data->count]);
+        data->count++;
     }
     fclose(file);
+    removeDuplicates(data);
+    data->dirty = false;
 }
 
-// Acciones switch
-void opcion1(TData *data) {
-    char apellido[LMAX];
-    if (llena(data)) {
-        printf("\nNo se pueden a\u00f1adir m\u00e1s empleados.\n");
+// Actions switch
+void actionAddEmployee(EmployeeData *data) {
+    char surname[LMAX];
+    if (isFull(data)) {
+        printf("\nYou can't add more employees.\n");
         return;
     }
     do {
-        printf("\nIngrese el apellido (solo letras, m\u00e1ximo 30 caracteres): ");
-        if (fgets(apellido, LMAX, stdin) == NULL) return;
-        limpiarEntrada(apellido);
-        if (!apellidoValido(apellido)) {
-            printf("\nEl apellido es inv\u00e1lido.\n");
+        printf("\nEnter the surname (letters and spaces only, max 30 chars): ");
+        if (fgets(surname, LMAX, stdin) == NULL) return;
+        trimNewline(surname);
+        if (!isValidSurname(surname)) {
+            printf("\nInvalid surname.\n");
         }
-    } while (!apellidoValido(apellido));
-    insertar(data, apellido);
-    eliminarRepetidos(data);
+    } while (!isValidSurname(surname));
+    addEmployee(data, surname);
+    removeDuplicates(data);
 }
 
-void opcion2(TData *data) {
-    char apellido[LMAX];
-    if (vacia(data)) {
-        printf("\nNo hay apellidos en la lista.\n");
+void actionDeleteEmployee(EmployeeData *data) {
+    char surname[LMAX];
+    if (isEmpty(data)) {
+        printf("\nThere are no surnames in the list.\n");
         return;
     }
-    printf("\nIngrese el apellido a dar de baja: ");
-    if (fgets(apellido, LMAX, stdin) == NULL) return;
-    limpiarEntrada(apellido);
-    suprimir(data, apellido);
+    printf("\nEnter the surname to remove: ");
+    if (fgets(surname, LMAX, stdin) == NULL) return;
+    trimNewline(surname);
+    deleteEmployee(data, surname);
 }
 
-void opcion3(TData *data) {
-    char apellido[LMAX];
-    if (vacia(data)) {
-        printf("\nNo hay apellidos en la lista.\n");
+void actionModifyEmployee(EmployeeData *data) {
+    char surname[LMAX];
+    if (isEmpty(data)) {
+        printf("\nThere are no surnames in the list.\n");
         return;
     }
-    printf("\nIngrese el apellido a modificar: ");
-    if (fgets(apellido, LMAX, stdin) == NULL) return;
-    limpiarEntrada(apellido);
-    if (encontrar(data, apellido) != -1) {
-        modificar(data, apellido);
-        eliminarRepetidos(data);
+    printf("\nEnter the surname to modify: ");
+    if (fgets(surname, LMAX, stdin) == NULL) return;
+    trimNewline(surname);
+    if (findSurname(data, surname) != -1) {
+        updateEmployeeSurname(data, surname);
+        removeDuplicates(data);
     } else {
-        printf("\nEl apellido '%s' no existe en la lista.\n", apellido);
+        printf("\nThe surname '%s' does not exist in the list.\n", surname);
     }
 }
 
-void opcion4(TData *data) {
-    mostrar(data);
+void actionListEmployees(EmployeeData *data) {
+    listEmployees(data);
 }
 
-void opcion5(TData *data) {
-    char apellido[LMAX];
-    if (vacia(data)) {
-        printf("\nNo hay apellidos en la lista.\n");
+void actionSearchEmployee(EmployeeData *data) {
+    char surname[LMAX];
+    if (isEmpty(data)) {
+        printf("\nThere are no surnames in the list.\n");
         return;
     }
-    printf("\nIngrese el apellido a buscar: ");
-    if (fgets(apellido, LMAX, stdin) == NULL) return;
-    limpiarEntrada(apellido);
-    int pos = encontrar(data, apellido);
+    printf("\nEnter the surname to search (exact): ");
+    if (fgets(surname, LMAX, stdin) == NULL) return;
+    trimNewline(surname);
+    int pos = findSurname(data, surname);
     if (pos != -1) {
-        printf("\nEl apellido '%s' se encuentra en la posici\u00f3n %d.\n", apellido, pos + 1);
+        char normalized[LMAX];
+        strncpy(normalized, surname, LMAX - 1);
+        normalized[LMAX - 1] = '\0';
+        normalizeSurname(normalized);
+        printf("\nThe surname '%s' is at position %d.\n", normalized, pos + 1);
     } else {
-        printf("\nEl apellido '%s' no est\u00e1 en la lista.\n", apellido);
+        printf("\nThe surname '%s' is not in the list.\n", surname);
     }
 }
 
-void opcion6(TData *data) {
-    guardarEmpleadosEnArchivo(data, "empleados.txt");
+void actionSaveToFile(EmployeeData *data) {
+    saveEmployeesToFile(data, "employees.txt");
+}
+
+// ===== Additional enhancements implementation =====
+
+static void ltrim(char *s) {
+    size_t i = 0;
+    while (s[i] == ' ') i++;
+    if (i > 0) memmove(s, s + i, strlen(s + i) + 1);
+}
+
+static void rtrim(char *s) {
+    size_t len = strlen(s);
+    while (len > 0 && s[len - 1] == ' ') {
+        s[--len] = '\0';
+    }
+}
+
+static void collapseSpaces(char *s) {
+    char *dst = s;
+    bool inSpace = false;
+    for (char *src = s; *src; ++src) {
+        if (*src == ' ') {
+            if (!inSpace) {
+                *dst++ = ' ';
+                inSpace = true;
+            }
+        } else {
+            *dst++ = *src;
+            inSpace = false;
+        }
+    }
+    *dst = '\0';
+}
+
+void normalizeSurname(char *surname) {
+    // Trim and collapse spaces
+    ltrim(surname);
+    rtrim(surname);
+    collapseSpaces(surname);
+    // Lowercase all, then title-case each word
+    for (int i = 0; surname[i] != '\0'; ++i) {
+        surname[i] = (char)tolower((unsigned char)surname[i]);
+    }
+    bool newWord = true;
+    for (int i = 0; surname[i] != '\0'; ++i) {
+        if (surname[i] == ' ') {
+            newWord = true;
+        } else if (newWord) {
+            surname[i] = (char)toupper((unsigned char)surname[i]);
+            newWord = false;
+        }
+    }
+}
+
+static void toLowerCopy(char *dst, const char *src, size_t n) {
+    size_t i;
+    for (i = 0; i < n - 1 && src[i] != '\0'; ++i) {
+        dst[i] = (char)tolower((unsigned char)src[i]);
+    }
+    dst[i] = '\0';
+}
+
+static bool containsSubstringCI(const char *haystack, const char *needle) {
+    if (!*needle) return true;
+    char h[LMAX];
+    char n[LMAX];
+    toLowerCopy(h, haystack, LMAX);
+    toLowerCopy(n, needle, LMAX);
+    // simple substring search
+    size_t hl = strlen(h), nl = strlen(n);
+    if (nl > hl) return false;
+    for (size_t i = 0; i + nl <= hl; ++i) {
+        if (strncmp(&h[i], n, nl) == 0) return true;
+    }
+    return false;
+}
+
+void searchBySubstring(EmployeeData *data) {
+    if (isEmpty(data)) {
+        printf("\nThere are no surnames in the list.\n");
+        return;
+    }
+    char term[LMAX];
+    printf("\nEnter a substring to search: ");
+    if (fgets(term, LMAX, stdin) == NULL) return;
+    trimNewline(term);
+    if (strlen(term) == 0) {
+        printf("Empty search term.\n");
+        return;
+    }
+    int found = 0;
+    printf("\nMatches:\n");
+    for (int i = 0; i < data->count; ++i) {
+        if (containsSubstringCI(data->surnames[i], term)) {
+            printf("[%d] %s\n", i + 1, data->surnames[i]);
+            found++;
+        }
+    }
+    if (!found) {
+        printf("No matches found for '%s'.\n", term);
+    }
+}
+
+static int cmpSurnamesAsc(const void *a, const void *b) {
+    const char (*sa)[LMAX] = (const char (*)[LMAX])a;
+    const char (*sb)[LMAX] = (const char (*)[LMAX])b;
+    return strcmp(*sa, *sb);
+}
+
+void sortSurnames(EmployeeData *data) {
+    if (data->count <= 1) {
+        printf("\nNothing to sort.\n");
+        return;
+    }
+    // qsort over fixed-size string array
+    qsort(data->surnames, data->count, sizeof(data->surnames[0]), cmpSurnamesAsc);
+    printf("\nSurnames sorted A-Z.\n");
+    data->dirty = true;
+}
+
+void saveEmployeesToFileAs(EmployeeData *data) {
+    char filename[128];
+    printf("\nEnter filename to save as: ");
+    if (fgets(filename, sizeof(filename), stdin) == NULL) return;
+    trimNewline(filename);
+    if (strlen(filename) == 0) {
+        printf("Invalid filename.\n");
+        return;
+    }
+    saveEmployeesToFile(data, filename);
+}
+
+int promptSaveIfDirty(EmployeeData *data) {
+    if (!data->dirty) return 1; // safe to exit
+    printf("\nYou have unsaved changes. Save before exit? (y/n/c): ");
+    char c;
+    if (scanf(" %c", &c) != 1) return 0;
+    getchar();
+    if (c == 'y' || c == 'Y') {
+        saveEmployeesToFile(data, "employees.txt");
+        return 1;
+    } else if (c == 'n' || c == 'N') {
+        return 1;
+    } else {
+        printf("Exit canceled.\n");
+        return 0;
+    }
 }
