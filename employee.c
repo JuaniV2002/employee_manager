@@ -61,13 +61,13 @@ int main() {
         printf("Add employee (1)\n");
         printf("Remove employee (2)\n");
         printf("Modify employee surname (3)\n");
-    printf("List employees (4)\n");
-    printf("Search surname (exact) (5)\n");
-    printf("Find by substring (6)\n");
-    printf("Sort surnames (A-Z) (7)\n");
-    printf("Save to CSV (8)\n");
-    printf("Save to CSV as... (9)\n");
-    printf("Exit (10)\n");
+        printf("List employees (4)\n");
+        printf("Search surname (exact) (5)\n");
+        printf("Find by substring (6)\n");
+        printf("Sort surnames (A-Z) (7)\n");
+        printf("Save to CSV (8)\n");
+        printf("Save to CSV as... (9)\n");
+        printf("Exit (10)\n");
         printf("-----------------------------------\n");
         printf("Enter an option: ");
         if (scanf("%d", &option) != 1) {
